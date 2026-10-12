@@ -455,6 +455,12 @@
             <label>ราคา (Price)</label>
             <input type="text" class="form-control" value="146 JPY (เครดิต BitCash)" disabled />
           </div>
+        <div class="form-group" style="margin-top:6px;">
+          <label>โหมดการทำงานของบอท (Bot Driver Mode)</label>
+          <select class="form-control" id="bot-mode" style="background:#1e293b; color:#f8fafc; border:1px solid #475569;">
+            <option value="simulate" selected>⚡ โหมดจำลองเร็ว + รอดึง OTP จาก Hotmail จริง (Simulation Mode with Real OTP Pipeline)</option>
+            <option value="playwright">🤖 โหมดบอทเบราว์เซอร์จริง (Full Playwright Chromium JP Region)</option>
+          </select>
         </div>
 
         <div class="safety-notice">
@@ -535,16 +541,29 @@
 
   <!-- Interactive OTP Modal -->
   <div class="modal-backdrop" id="otp-modal">
-    <div class="modal-box">
+    <div class="modal-box" style="max-width: 520px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3 style="font-size:1.15rem; font-weight:600;">🔐 กรอกรหัส OTP ยืนยัน BitCash</h3>
-        <span style="font-size:0.75rem; color:var(--warning);">Step 5.3</span>
+        <span style="font-size:0.75rem; color:var(--warning); background:rgba(245,158,11,0.15); padding:2px 8px; border-radius:4px;">Step 5.3</span>
       </div>
-      <p style="font-size:0.85rem; color:var(--text-muted);">
-        ระบบได้ส่งรหัส OTP 6 หลักไปยังอีเมล <strong style="color:white;">Inblackbitcash7g@hotmail.com</strong> แล้ว หรือขอรับจาก HR ช่วง 12:00 - 17:00
-      </p>
+      
+      <div style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.25); border-radius:8px; padding:10px 14px; margin-top:8px;">
+        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#38bdf8; font-weight:500;">
+          <div class="dot" style="background:#38bdf8;"></div>
+          <span>ระบบกำลังเชื่อมต่อ Hotmail IMAP เพื่อดึง OTP อัตโนมัติ</span>
+        </div>
+        <p style="font-size:0.78rem; color:#94a3b8; margin-top:4px; line-height:1.4;">
+          ตรวจหากล่องจดหมาย: <strong style="color:#f8fafc;">Inblackbitcash7g@hotmail.com</strong><br>
+          (หากมีอีเมล OTP จาก BitCash เข้ามา ระบบจะตรวจจับและดำเนินการให้อัตโนมัติทันที)
+        </p>
+      </div>
 
-      <div class="otp-inputs">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+        <span style="font-size:0.82rem; color:var(--text-muted);">หรือกรอกรหัส 6 หลักด้วยตนเอง (หรือ Paste ได้เลย):</span>
+        <span style="font-size:0.8rem; color:#facc15; font-weight:600;" id="otp-countdown">120 วินาที</span>
+      </div>
+
+      <div class="otp-inputs" style="margin-top:8px;">
         <input type="text" maxlength="1" class="otp-input" id="otp-1" />
         <input type="text" maxlength="1" class="otp-input" id="otp-2" />
         <input type="text" maxlength="1" class="otp-input" id="otp-3" />
@@ -553,9 +572,14 @@
         <input type="text" maxlength="1" class="otp-input" id="otp-6" />
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button class="btn btn-refresh" onclick="closeOtpModal()">ปิด</button>
-        <button class="btn btn-success" onclick="submitOtpFromModal()">ยืนยันรหัส OTP</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+        <button type="button" class="btn btn-warning" onclick="fillMockOtp()" style="font-size:0.78rem; padding:6px 10px;" title="สำหรับทดสอบลัดนอกช่วงเวลา 12:00-17:00">
+          ⚡ ใช้รหัสทดสอบด่วน (151550)
+        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-refresh" onclick="closeOtpModal()">ปิด</button>
+          <button class="btn btn-success" onclick="submitOtpFromModal()">ยืนยันรหัส OTP</button>
+        </div>
       </div>
     </div>
   </div>
@@ -655,6 +679,7 @@
     async function startTopup() {
       const uid = document.getElementById('order-uid').value;
       const server = document.getElementById('order-server').value;
+      const mode = document.getElementById('bot-mode')?.value || 'simulate';
       const btn = document.getElementById('btn-start-topup');
       btn.disabled = true;
 
@@ -662,7 +687,7 @@
         const res = await fetch('/api/v1/topup/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ uid, server, autoExecute: true })
+          body: JSON.stringify({ uid, server, mode, autoExecute: true })
         });
         const json = await res.json();
         if (json.success) {
@@ -711,30 +736,77 @@
 
       if (order.status === 'WAITING_OTP') {
         openOtpModal(order.id);
+      } else if (order.status === 'SUBMITTING_OTP' || order.status === 'PAYMENT_COMPLETED' || order.status === 'RECEIPT_CAPTURED') {
+        closeOtpModal();
       }
     }
+
+    let otpTimerInterval = null;
 
     function openOtpModal(orderId) {
       activeOrderId = orderId;
       document.getElementById('otp-modal').style.display = 'flex';
       setupOtpInputHandlers();
+      startOtpCountdown(120);
       document.getElementById('otp-1').focus();
     }
 
     function closeOtpModal() {
       document.getElementById('otp-modal').style.display = 'none';
+      if (otpTimerInterval) clearInterval(otpTimerInterval);
+    }
+
+    function startOtpCountdown(seconds) {
+      if (otpTimerInterval) clearInterval(otpTimerInterval);
+      let remaining = seconds;
+      const el = document.getElementById('otp-countdown');
+      if (el) el.textContent = `${remaining} วินาที`;
+
+      otpTimerInterval = setInterval(() => {
+        remaining--;
+        if (el) el.textContent = `${remaining} วินาที`;
+        if (remaining <= 0) {
+          clearInterval(otpTimerInterval);
+          if (el) el.textContent = 'หมดเวลา';
+        }
+      }, 1000);
     }
 
     function setupOtpInputHandlers() {
       const inputs = [1,2,3,4,5,6].map(i => document.getElementById(`otp-${i}`));
       inputs.forEach((input, idx) => {
+        input.value = '';
         input.oninput = () => {
           if (input.value && idx < 5) inputs[idx + 1].focus();
         };
         input.onkeydown = (e) => {
           if (e.key === 'Backspace' && !input.value && idx > 0) inputs[idx - 1].focus();
         };
+        input.onpaste = (e) => {
+          e.preventDefault();
+          const pasteText = (e.clipboardData || window.clipboardData).getData('text').trim();
+          const digits = pasteText.replace(/\D/g, '').slice(0, 6);
+          if (digits) {
+            digits.split('').forEach((d, i) => {
+              if (inputs[i]) inputs[i].value = d;
+            });
+            if (digits.length === 6) {
+              inputs[5].focus();
+            } else if (inputs[digits.length]) {
+              inputs[digits.length].focus();
+            }
+          }
+        };
       });
+    }
+
+    function fillMockOtp() {
+      const mock = '151550';
+      mock.split('').forEach((d, i) => {
+        const el = document.getElementById(`otp-${i+1}`);
+        if (el) el.value = d;
+      });
+      submitOtpFromModal();
     }
 
     async function submitOtpFromModal() {

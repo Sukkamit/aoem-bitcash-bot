@@ -9,6 +9,7 @@ const orderSchema = z.object({
   packName: z.string().optional(),
   priceJpy: z.number().positive().optional(),
   autoExecute: z.boolean().optional().default(true),
+  mode: z.enum(['simulate', 'playwright']).optional(),
 });
 
 const otpSchema = z.object({

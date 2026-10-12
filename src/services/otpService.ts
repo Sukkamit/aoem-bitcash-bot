@@ -24,8 +24,8 @@ class OtpService extends EventEmitter {
         resolve(otp);
       });
 
-      // Also trigger background email IMAP polling if credentials are set (not in test/simulate)
-      if (!CONFIG.BOT.SIMULATE_MODE && process.env.NODE_ENV !== 'test') {
+      // Also trigger background email IMAP polling if credentials are set (not in test)
+      if (process.env.NODE_ENV !== 'test') {
         this.pollEmailForOtp(orderId, timeoutMs).catch((err) => {
           console.warn(`[OTP Email Warning]: Could not auto-fetch from IMAP (${err.message}). Awaiting manual submission.`);
         });

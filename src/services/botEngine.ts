@@ -47,6 +47,7 @@ export class BotEngine extends EventEmitter {
       priceJpy,
       status: 'PENDING',
       stepDescription: 'ออเดอร์ถูกสร้างขึ้น รอเริ่มการทำงาน',
+      mode: req?.mode || (CONFIG.BOT.SIMULATE_MODE ? 'simulate' : 'playwright'),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -91,7 +92,8 @@ export class BotEngine extends EventEmitter {
     this.currentExecutingOrderId = orderId;
 
     try {
-      if (CONFIG.BOT.SIMULATE_MODE) {
+      const mode = (order as any).mode || (CONFIG.BOT.SIMULATE_MODE ? 'simulate' : 'playwright');
+      if (mode === 'simulate') {
         return await this.executeSimulationMode(order);
       } else {
         return await this.executePlaywrightMode(order);
@@ -270,15 +272,22 @@ export class BotEngine extends EventEmitter {
     this.updateOrderStatus(
       order.id,
       'WAITING_OTP',
-      `รอรหัส OTP 6 หลัก จากอีเมล ${CONFIG.EMAIL_OTP.EMAIL} (หรือส่งผ่าน UI / API)`
+      `รอรหัส OTP 6 หลัก จากอีเมล ${CONFIG.EMAIL_OTP.EMAIL} (กำลังเชื่อมต่อ IMAP / สามารถกรอกผ่านหน้าเว็บได้)`
     );
 
-    // If test environment, auto-provide OTP after short delay
-    const autoTimer = setTimeout(() => {
-      otpService.submitManualOtp(order.id, '151550');
-    }, 1500);
+    // If running in automated Jest test environment, auto-provide mock OTP quickly
+    let autoTimer: NodeJS.Timeout | null = null;
+    if (process.env.NODE_ENV === 'test') {
+      autoTimer = setTimeout(() => {
+        otpService.submitManualOtp(order.id, '151550');
+      }, 500);
+    }
 
-    const otp = await otpService.waitForOtp(order.id, 5000).finally(() => clearTimeout(autoTimer));
+    const waitTimeout = process.env.NODE_ENV === 'test' ? 5000 : CONFIG.BOT.OTP_WAIT_TIMEOUT_MS;
+    const otp = await otpService.waitForOtp(order.id, waitTimeout).finally(() => {
+      if (autoTimer) clearTimeout(autoTimer);
+    });
+
     this.updateOrderStatus(order.id, 'SUBMITTING_OTP', `กรอกรหัส OTP: ${otp} และกดชำระเงิน`);
     await delay(800);
 

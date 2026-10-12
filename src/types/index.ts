@@ -18,6 +18,7 @@ export interface TopupOrderRequest {
   packName?: string;
   priceJpy?: number;
   autoOtp?: boolean;
+  mode?: 'simulate' | 'playwright';
 }
 
 export interface ReceiptInfo {
@@ -38,6 +39,7 @@ export interface TopupOrder {
   priceJpy: number;
   status: BotOrderStatus;
   stepDescription: string;
+  mode?: 'simulate' | 'playwright';
   receipt?: ReceiptInfo;
   error?: string;
   createdAt: string;
