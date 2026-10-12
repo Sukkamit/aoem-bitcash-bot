@@ -169,7 +169,7 @@ docker compose up --build -d
 npm test
 ```
 
-**ผลการทดสอบ (11/11 Passed):**
+**ผลการทดสอบ (12/12 Passed):**
 ```
 PASS tests/bot.test.ts
   Age of Empires Mobile - Bitcash Top-Up Bot & Balance Checker Suite
@@ -185,15 +185,16 @@ PASS tests/bot.test.ts
     4. OTP Validation & Handling
       √ Should reject invalid OTP format
       √ Should accept valid 6-digit OTP code
+      √ Should strictly fail order and NOT generate receipt when incorrect OTP (111111) is provided
     5. BitCash Balance & Transaction Ledger
       √ GET /api/v1/bitcash/balance should return current balance
       √ POST /api/v1/bitcash/balance/check should query direct balance
       √ GET /api/v1/bitcash/balance/history should return transaction ledger
 
 Test Suites: 1 passed, 1 total
-Tests:       11 passed, 11 total
+Tests:       12 passed, 12 total
 Snapshots:   0 total
-Time:        29.61 s
+Time:        15.42 s
 ```
 
 ---
