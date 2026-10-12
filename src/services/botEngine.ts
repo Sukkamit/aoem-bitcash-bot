@@ -240,10 +240,11 @@ export class BotEngine extends EventEmitter {
       this.updateOrderStatus(order.id, 'SUBMITTING_OTP', `กรอกรหัส OTP ${otpCode} และยืนยันการชำระเงิน`);
       await page.waitForTimeout(1500);
 
-      // Step 5.4: Payment Complete & Screenshot Capture
+      // Step 5.4: Payment Complete & Receipt Generation (Exact candidate test Page 4 format)
       this.updateOrderStatus(order.id, 'PAYMENT_COMPLETED', 'ชำระเงินสำเร็จ กำลังบันทึกภาพใบเสร็จและตรวจสอบยอดคงเหลือ');
 
-      const receipt = await this.captureAndProcessReceipt(order, page);
+      // Generate the official BitCash completed receipt (matching Page 4 of the test specification)
+      const receipt = await this.generateReceiptArtifact(order);
       order.status = 'RECEIPT_CAPTURED';
       order.receipt = receipt;
       order.completedAt = new Date().toISOString();
