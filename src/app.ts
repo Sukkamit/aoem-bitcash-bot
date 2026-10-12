@@ -30,6 +30,22 @@ app.get('/receipts/:filename', (req, res) => {
 
   // If user opens directly in a browser tab (Accept text/html), render a sleek preview card
   if (req.headers.accept?.includes('text/html')) {
+    let previewHtml = '';
+    const isSvg = targetPath.endsWith('.svg');
+
+    if (isSvg) {
+      const svgText = fs.readFileSync(targetPath, 'utf8');
+      previewHtml = `<div class="svg-wrapper">${svgText}</div>`;
+    } else {
+      const imgBuffer = fs.readFileSync(targetPath);
+      const base64Img = imgBuffer.toString('base64');
+      previewHtml = `
+        <div style="background:#fff; border-radius:12px; overflow:hidden; max-height:75vh; overflow-y:auto; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+          <img src="data:image/png;base64,${base64Img}" alt="Receipt Screenshot" style="width:100%; height:auto; display:block;" />
+        </div>
+      `;
+    }
+
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     return res.send(`
       <!DOCTYPE html>
@@ -58,7 +74,7 @@ app.get('/receipts/:filename', (req, res) => {
             border-radius: 14px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             padding: 18px 20px;
-            max-width: 640px;
+            max-width: 720px;
             max-height: 94vh;
             overflow-y: auto;
             width: 100%;
@@ -114,9 +130,7 @@ app.get('/receipts/:filename', (req, res) => {
             <span class="title">🧾 Midasbuy & BitCash 決済完了レシート</span>
             <span class="badge">ชำระเงินสำเร็จ</span>
           </div>
-          <div class="svg-wrapper">
-            ${content}
-          </div>
+          ${previewHtml}
           <div class="actions">
             <button class="btn" onclick="window.print()">พิมพ์ / บันทึกเอกสาร</button>
             <button class="btn" style="background:#475569;" onclick="window.close()">ปิดหน้านี้</button>
@@ -127,9 +141,13 @@ app.get('/receipts/:filename', (req, res) => {
     `);
   }
 
-  // Otherwise, return direct image/svg+xml
+  // Otherwise, return direct binary or SVG
+  if (targetPath.endsWith('.png')) {
+    res.setHeader('Content-Type', 'image/png');
+    return res.sendFile(targetPath);
+  }
   res.setHeader('Content-Type', 'image/svg+xml');
-  return res.send(content);
+  return res.sendFile(targetPath);
 });
 
 // Health Check
