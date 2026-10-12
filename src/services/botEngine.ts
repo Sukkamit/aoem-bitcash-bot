@@ -159,6 +159,10 @@ export class BotEngine extends EventEmitter {
       // Step 1: Open Midasbuy Japan
       this.updateOrderStatus(order.id, 'INITIALIZING', 'เปิดเว็บไซต์ Midasbuy Region Japan (aoem)');
       await page.goto(CONFIG.MIDASBUY.BUY_URL, { waitUntil: 'domcontentloaded', timeout: CONFIG.BOT.TIMEOUT_MS });
+      await page.waitForTimeout(2000);
+
+      // Auto-dismiss Event Banners & Cookie Consents if present
+      await this.dismissMidasbuyPopups(page);
 
       // Step 2: Login Midasbuy Account
       this.updateOrderStatus(
@@ -166,7 +170,16 @@ export class BotEngine extends EventEmitter {
         'LOGGING_IN_MIDASBUY',
         `เข้าสู่ระบบ Midasbuy ด้วยบัญชี ${CONFIG.MIDASBUY.EMAIL}`
       );
-      // Wait for login triggers and submit credentials
+      // Try clicking login if available
+      try {
+        const loginBtn = page.locator('text=Midasbuyにサインインする, text=サインイン, .login-btn').first();
+        if (await loginBtn.isVisible({ timeout: 2000 })) {
+          await loginBtn.click();
+          await page.waitForTimeout(1000);
+          await this.dismissMidasbuyPopups(page);
+        }
+      } catch (e) {}
+
       await page.waitForTimeout(1000);
 
       // Step 3: Input UID & Server
@@ -175,6 +188,15 @@ export class BotEngine extends EventEmitter {
         'SELECTING_PACKAGE',
         `กรอก UID: ${order.uid} และตรวจสอบ Server: ${order.server}`
       );
+      try {
+        // Attempt filling UID input field if visible
+        const uidInput = page.locator('input[placeholder*="ID"], input[placeholder*="Player"], input[type="text"]').first();
+        if (await uidInput.isVisible({ timeout: 2000 })) {
+          await uidInput.fill(order.uid);
+          await page.waitForTimeout(500);
+        }
+      } catch (e) {}
+
       await page.waitForTimeout(1000);
 
       // Step 4: Select Pack 99+109 Coin (146 JPY)
@@ -183,6 +205,12 @@ export class BotEngine extends EventEmitter {
         'SELECTING_PACKAGE',
         `เลือกแพ็กเกจ ${order.packName} ราคา ${order.priceJpy} JPY`
       );
+      try {
+        const pack146 = page.locator('text=146円, text=400').first();
+        if (await pack146.isVisible({ timeout: 2000 })) {
+          await pack146.click();
+        }
+      } catch (e) {}
       await page.waitForTimeout(1000);
 
       // Step 5: Choose Payment Channel Bitcash -> MyBitCash
@@ -230,6 +258,50 @@ export class BotEngine extends EventEmitter {
     } finally {
       if (browser) await browser.close();
     }
+  }
+
+  /**
+   * Dismiss common popups, promotional modals, and cookie banners on Midasbuy Japan
+   */
+  private async dismissMidasbuyPopups(page: Page): Promise<void> {
+    try {
+      // 1. Accept or reject Cookie consent banner
+      const cookieBtn = page.locator(
+        'button:has-text("すべてのオプションのCookieを受け入れる"), button:has-text("Cookieを受け入れる"), button:has-text("同意する"), .cookie-btn, .opt-in-cookie'
+      ).first();
+      if (await cookieBtn.isVisible({ timeout: 1500 })) {
+        await cookieBtn.click({ force: true });
+        await page.waitForTimeout(500);
+      }
+    } catch (e) {}
+
+    try {
+      // 2. Event promo banner close button (X button on AOEM VIP banner)
+      const closePromoSelectors = [
+        '.pop-close',
+        '.dialog-close',
+        '.close-btn',
+        'button[aria-label="Close"]',
+        'button[aria-label="close"]',
+        '.modal-close',
+        'svg.close-icon',
+        'text="✕"',
+        'text="×"',
+      ];
+      for (const sel of closePromoSelectors) {
+        const el = page.locator(sel).first();
+        if (await el.isVisible({ timeout: 800 })) {
+          await el.click({ force: true });
+          await page.waitForTimeout(400);
+          break;
+        }
+      }
+    } catch (e) {}
+
+    try {
+      // 3. Fallback: Press Escape key to dismiss any active modal dialog
+      await page.keyboard.press('Escape');
+    } catch (e) {}
   }
 
   /**
