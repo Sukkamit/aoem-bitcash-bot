@@ -200,5 +200,14 @@ Time:        29.61 s
 
 ## 📁 ไฟล์ทดสอบเพิ่มเติม (API Testing Files)
 
-- **`bitcash.http`**: ไฟล์ REST Client สำหรับทดสอบยิง API ผ่าน Visual Studio Code หรือ JetBrains IDEs
+- **🌐 Interactive Web Dashboard**: เปิด Browser ไปที่ **[http://localhost:3003](http://localhost:3003)** (รองรับการสั่งเติมเงินอัตโนมัติ, กรอก OTP 6 หลัก, ดึง OTP จากอีเมล, รหัสทดสอบด่วน 151550, และดูใบเสร็จรับเงินทางการตาม Page 4 ของข้อสอบ)
+- **`aoem.http`** / **`bitcash.http`**: ไฟล์ REST Client สำหรับทดสอบยิง API ผ่าน Visual Studio Code หรือ JetBrains IDEs
 - **`postman_collection.json`**: คอลเลกชัน Postman ครบทุกคำขอ สามารถนำเข้า (Import) แล้วรันได้ทันที
+
+---
+
+## 9. ข้อมูลอ้างอิงชุดข้อสอบทั้ง 4 ส่วน (Complete Suite Map)
+- **ข้อ 1 (Task A): Order Tracking API & State Machine** — `c:\Project\inback` (Port: 3000)
+- **ข้อ 2 (Task B): Aniimo Reverse Engineering & UID Top-Up** — `c:\Project\aniimo-topup` (Port: 3001)
+- **ข้อ 3 (Task C): Centralized Bot Monitoring & Control Center** — `c:\Project\oxide-bot-monitor` (Port: 3002)
+- **ข้อ 4 (Task D): AOEM BitCash Top-Up Bot & Balance Checker** — `c:\Project\aoem-bitcash-bot` (Port: 3003)
