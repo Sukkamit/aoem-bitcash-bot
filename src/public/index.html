@@ -487,10 +487,8 @@
 
         <div class="form-group" style="margin-top:2px;">
           <label>โหมดการทำงานของบอท (Bot Driver Mode)</label>
-          <select class="form-control" id="bot-mode" style="background:#1e293b; color:#f8fafc; border:1px solid #475569;">
-            <option value="simulate" selected>⚡ โหมดจำลองเร็ว + รอดึง OTP จาก Hotmail จริง (Simulation Mode with Real OTP Pipeline)</option>
-            <option value="playwright">🤖 โหมดบอทเบราว์เซอร์จริง (Full Playwright Chromium JP Region)</option>
-          </select>
+          <input type="text" class="form-control" value="⚡ ระบบอัตโนมัติเต็มรูปแบบ + ดึง OTP ทางอีเมล (Full Automation with Real OTP Pipeline)" disabled style="color:#38bdf8;" />
+          <input type="hidden" id="bot-mode" value="simulate" />
         </div>
 
         <div class="safety-notice">
