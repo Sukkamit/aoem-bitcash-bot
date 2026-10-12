@@ -238,8 +238,7 @@ export class BotEngine extends EventEmitter {
       const otpCode = await otpService.waitForOtp(order.id, CONFIG.BOT.OTP_WAIT_TIMEOUT_MS);
 
       // Validate OTP strictly: Must match bypass code 151550 or latest Hotmail OTP
-      const expectedOtp = otpService.getLastKnownOtp() || '151550';
-      if (otpCode !== '151550' && otpCode !== expectedOtp) {
+      if (!otpService.isValidOtp(otpCode)) {
         throw new Error(`INVALID_OTP: รหัส OTP '${otpCode}' ไม่ถูกต้องตามที่ได้รับจากระบบ BitCash`);
       }
 
@@ -259,6 +258,9 @@ export class BotEngine extends EventEmitter {
       this.emit('order_completed', order);
       return order;
     } catch (err: any) {
+      if (err.message && (err.message.includes('INVALID_OTP') || err.message.includes('SAFETY_LOCK'))) {
+        throw err;
+      }
       console.warn(`[Playwright Automation Fallback]: ${err.message}. Transitioning gracefully.`);
       // If external live midasbuy requires human captcha / OTP slot, proceed with fallback simulation
       return await this.executeSimulationMode(order);
@@ -370,10 +372,12 @@ export class BotEngine extends EventEmitter {
 
     // If running in automated Jest test environment, auto-provide mock OTP quickly
     let autoTimer: NodeJS.Timeout | null = null;
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test' && !(order as any).skipMockOtp) {
       autoTimer = setTimeout(() => {
-        otpService.submitManualOtp(order.id, '151550');
-      }, 500);
+        if (otpService.isWaitingForOtp(order.id)) {
+          otpService.submitManualOtp(order.id, '151550');
+        }
+      }, 800);
     }
 
     const waitTimeout = process.env.NODE_ENV === 'test' ? 5000 : CONFIG.BOT.OTP_WAIT_TIMEOUT_MS;
@@ -382,8 +386,7 @@ export class BotEngine extends EventEmitter {
     });
 
     // Validate OTP strictly: Must match bypass code 151550 or latest Hotmail OTP
-    const expectedOtp = otpService.getLastKnownOtp() || '151550';
-    if (otp !== '151550' && otp !== expectedOtp) {
+    if (!otpService.isValidOtp(otp)) {
       throw new Error(`INVALID_OTP: รหัส OTP '${otp}' ไม่ถูกต้องตามที่ได้รับจากระบบ BitCash`);
     }
 

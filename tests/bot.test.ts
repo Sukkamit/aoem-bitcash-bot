@@ -111,6 +111,35 @@ describe('Age of Empires Mobile - Bitcash Top-Up Bot & Balance Checker Suite', (
       expect(res.body.success).toBe(true);
       expect(res.body.otp).toBe('151550');
     });
+
+    it('Should strictly fail order and NOT generate receipt when incorrect OTP (111111) is provided', async () => {
+      const createRes = await request(app)
+        .post('/api/v1/topup/orders')
+        .send({
+          uid: '5250140737488366145',
+          server: 'Empire#239',
+          autoExecute: false,
+          mode: 'simulate',
+        });
+      const wrongOrderId = createRes.body.data.id;
+
+      // Pre-submit wrong OTP '111111'
+      const otpRes = await request(app)
+        .post(`/api/v1/topup/orders/${wrongOrderId}/otp`)
+        .send({ otp: '111111' });
+      expect(otpRes.status).toBe(200);
+
+      // Execute order (which reads the pre-submitted OTP and fails)
+      const execRes = await request(app).post(`/api/v1/topup/orders/${wrongOrderId}/execute`);
+      expect(execRes.status).toBe(400);
+      expect(execRes.body.success).toBe(false);
+      expect(execRes.body.error).toContain('INVALID_OTP');
+
+      // Check order state: status must be FAILED and receipt must NOT exist
+      const checkRes = await request(app).get(`/api/v1/topup/orders/${wrongOrderId}`);
+      expect(checkRes.body.data.status).toBe('FAILED');
+      expect(checkRes.body.data.receipt).toBeUndefined();
+    });
   });
 
   describe('5. BitCash Balance & Transaction Ledger', () => {

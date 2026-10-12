@@ -632,8 +632,9 @@
       ws.onmessage = (e) => {
         try {
           const msg = JSON.parse(e.data);
-          if (msg.event === 'order_updated') {
+          if (msg.event === 'order_updated' || msg.event === 'order_failed') {
             updateLiveOrderProgress(msg.data);
+            fetchOrders();
           } else if (msg.event === 'order_completed') {
             updateLiveOrderProgress(msg.data);
             fetchBalance();
@@ -734,7 +735,9 @@
 
     function updateLiveOrderProgress(order) {
       document.getElementById('bot-status-text').textContent = order.status;
-      document.getElementById('bot-status-tag').textContent = order.status;
+      const tag = document.getElementById('bot-status-tag');
+      tag.textContent = order.status;
+      tag.className = 'status-tag status-' + order.status.toLowerCase();
       document.getElementById('current-step-desc').textContent = order.stepDescription;
 
       // Update step numbers visually
@@ -748,23 +751,30 @@
         'SUBMITTING_OTP': 6,
         'PAYMENT_COMPLETED': 6,
         'RECEIPT_CAPTURED': 6,
+        'FAILED': 6,
       };
 
       const currentStepNum = stepMapping[order.status] || 0;
       for (let i = 1; i <= 6; i++) {
         const el = document.getElementById(`step-${i}`);
-        if (i < currentStepNum) {
+        if (order.status === 'FAILED' && i === 6) {
+          el.className = 'step-item active';
+          el.style.color = '#f87171';
+        } else if (i < currentStepNum) {
           el.className = 'step-item completed';
+          el.style.color = '';
         } else if (i === currentStepNum) {
           el.className = 'step-item active';
+          el.style.color = '';
         } else {
           el.className = 'step-item';
+          el.style.color = '';
         }
       }
 
       if (order.status === 'WAITING_OTP') {
         openOtpModal(order.id);
-      } else if (order.status === 'SUBMITTING_OTP' || order.status === 'PAYMENT_COMPLETED' || order.status === 'RECEIPT_CAPTURED') {
+      } else if (order.status === 'SUBMITTING_OTP' || order.status === 'PAYMENT_COMPLETED' || order.status === 'RECEIPT_CAPTURED' || order.status === 'FAILED') {
         closeOtpModal();
       }
     }
