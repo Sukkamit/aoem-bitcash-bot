@@ -135,8 +135,35 @@ graph LR
 
 ## 🚀 วิธีการติดตั้งและรันระบบ (Quick Start)
 
-### วิธีที่ 1: รันในเครื่อง (Local Mode)
+### วิธีที่ 1: รันแบบ Standalone ในเครื่อง (Local Development)
 
+#### 1. การตั้งค่า Environment Variables (`.env`)
+คัดลอกไฟล์ `.env.example` เพื่อสร้างไฟล์ `.env` สำหรับกำหนดข้อมูลบัญชีและพอร์ตการทำงาน:
+```bash
+# บน Linux / macOS / Git Bash
+cp .env.example .env
+
+# หรือบน Windows PowerShell
+Copy-Item .env.example .env
+```
+
+**ตารางคำอธิบายตัวแปร Environment Variables ทั้งหมด:**
+
+| ตัวแปร (Variable) | ค่าเริ่มต้น (Default) | คำอธิบาย (Description) |
+| :--- | :--- | :--- |
+| `PORT` | `3003` | พอร์ตสำหรับรัน Automation Bot API Server และ Web Dashboard |
+| `NODE_ENV` | `development` | สภาพแวดล้อมการทำงาน (`development` หรือ `production`) |
+| `SIMULATE_MODE` | `false` | โหมดรันระบบ (`false` = จำลอง UI สมบูรณ์แบบ & จับเวลาจริง, `true` = Mocking โหมด) |
+| `MIDASBUY_EMAIL` | `Botfordevinblack@hotmail.com` | อีเมลบัญชี Midasbuy Japan สำหรับเข้าสู่ระบบ |
+| `MIDASBUY_PASSWORD` | `testdev123` | รหัสผ่านบัญชี Midasbuy Japan |
+| `BITCASH_MEMBER_ID` | `Inblackm7` | BitCash Member ID สำหรับตัดเงินตามโจทย์ |
+| `BITCASH_PASSWORD` | `kanomtandede@7` | รหัสผ่าน BitCash Member |
+| `EMAIL_OTP_USER` | `Inblackbitcash7g@hotmail.com` | บัญชี Hotmail / Outlook สำหรับรับ OTP 6 หลัก |
+| `EMAIL_OTP_PASSWORD` | `Tishaluna123` | รหัสผ่านอีเมล Hotmail / Outlook |
+| `IMAP_HOST` | `outlook.office365.com` | เซิร์ฟเวอร์ IMAP สำหรับดึงอีเมล OTP อัตโนมัติ |
+| `IMAP_PORT` | `993` | พอร์ต IMAP SSL/TLS |
+
+#### 2. การติดตั้งและรันเซิร์ฟเวอร์
 ```bash
 cd c:\Project\aoem-bitcash-bot
 
@@ -148,6 +175,7 @@ npm run dev
 ```
 
 เปิดเบราว์เซอร์ไปที่: **http://localhost:3003** เพื่อใช้งานหน้า Dashboard
+
 
 ---
 
