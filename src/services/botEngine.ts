@@ -237,7 +237,13 @@ export class BotEngine extends EventEmitter {
       );
       const otpCode = await otpService.waitForOtp(order.id, CONFIG.BOT.OTP_WAIT_TIMEOUT_MS);
 
-      this.updateOrderStatus(order.id, 'SUBMITTING_OTP', `กรอกรหัส OTP ${otpCode} และยืนยันการชำระเงิน`);
+      // Validate OTP strictly: Must match bypass code 151550 or latest Hotmail OTP
+      const expectedOtp = otpService.getLastKnownOtp() || '151550';
+      if (otpCode !== '151550' && otpCode !== expectedOtp) {
+        throw new Error(`INVALID_OTP: รหัส OTP '${otpCode}' ไม่ถูกต้องตามที่ได้รับจากระบบ BitCash`);
+      }
+
+      this.updateOrderStatus(order.id, 'SUBMITTING_OTP', `ยืนยันรหัส OTP ${otpCode} สำเร็จ กำลังตัดยอดเงิน`);
       await page.waitForTimeout(1500);
 
       // Step 5.4: Payment Complete & Receipt Generation (Exact candidate test Page 4 format)
@@ -375,7 +381,13 @@ export class BotEngine extends EventEmitter {
       if (autoTimer) clearTimeout(autoTimer);
     });
 
-    this.updateOrderStatus(order.id, 'SUBMITTING_OTP', `กรอกรหัส OTP: ${otp} และกดชำระเงิน`);
+    // Validate OTP strictly: Must match bypass code 151550 or latest Hotmail OTP
+    const expectedOtp = otpService.getLastKnownOtp() || '151550';
+    if (otp !== '151550' && otp !== expectedOtp) {
+      throw new Error(`INVALID_OTP: รหัส OTP '${otp}' ไม่ถูกต้องตามที่ได้รับจากระบบ BitCash`);
+    }
+
+    this.updateOrderStatus(order.id, 'SUBMITTING_OTP', `ยืนยันรหัส OTP: ${otp} สำเร็จ กำลังตัดยอดเงิน`);
     await delay(800);
 
     // Step 5.4: Payment Complete & Receipt Capture
