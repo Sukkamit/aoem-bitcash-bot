@@ -49,20 +49,23 @@ app.get('/receipts/:filename', (req, res) => {
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 24px;
+            padding: 16px;
+            box-sizing: border-box;
           }
           .card {
             background: #111827;
             border: 1px solid #1f2937;
-            border-radius: 16px;
+            border-radius: 14px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            padding: 24px;
-            max-width: 680px;
+            padding: 18px 20px;
+            max-width: 640px;
+            max-height: 94vh;
+            overflow-y: auto;
             width: 100%;
             text-align: center;
           }
           .header {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;

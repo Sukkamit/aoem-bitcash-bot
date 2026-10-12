@@ -1,0 +1,45 @@
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
+      <defs>
+        <style>
+          .bg { fill: #ffffff; }
+          .title { font-family: sans-serif; font-size: 20px; font-weight: bold; fill: #1e293b; text-anchor: middle; }
+          .subtitle { font-family: sans-serif; font-size: 13px; fill: #64748b; text-anchor: middle; }
+          .box { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; rx: 8; }
+          .label { font-family: sans-serif; font-size: 14px; fill: #475569; }
+          .value { font-family: monospace; font-size: 15px; font-weight: bold; fill: #0f172a; text-anchor: end; }
+          .highlight { font-family: monospace; font-size: 18px; font-weight: bold; fill: #0284c7; text-anchor: end; }
+          .check-circle { fill: #10b981; }
+        </style>
+      </defs>
+      <rect width="600" height="420" fill="#f1f5f9" />
+      <rect x="30" y="25" width="540" height="370" rx="12" class="bg" stroke="#cbd5e1" stroke-width="1.5" />
+      
+      <circle cx="300" cy="65" r="22" class="check-circle" />
+      <path d="M290 65 L297 72 L312 56" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      
+      <text x="300" y="105" class="title">お支払いが完了しました</text>
+      <text x="300" y="125" class="subtitle">お支払いが完了し、ログアウトしました。</text>
+      
+      <rect x="55" y="145" width="490" height="225" class="box" />
+      
+      <text x="75" y="180" class="label">請求番号 (Invoice No.)</text>
+      <text x="525" y="180" class="value">INV20261012103748</text>
+      <line x1="75" y1="195" x2="525" y2="195" stroke="#e2e8f0" stroke-width="1" />
+      
+      <text x="75" y="225" class="label">お支払い額</text>
+      <text x="525" y="225" class="highlight">146 クレジット</text>
+      <line x1="75" y1="240" x2="525" y2="240" stroke="#e2e8f0" stroke-width="1" />
+      
+      <text x="75" y="270" class="label">マイビットキャッシュ残高</text>
+      <text x="525" y="270" class="value">23,242 クレジット</text>
+      <line x1="75" y1="285" x2="525" y2="285" stroke="#e2e8f0" stroke-width="1" />
+      
+      <text x="75" y="315" class="label">トランザクション番号</text>
+      <text x="525" y="315" class="value">5038090000014622</text>
+      <line x1="75" y1="330" x2="525" y2="330" stroke="#e2e8f0" stroke-width="1" />
+      
+      <text x="75" y="355" class="label">受付日時</text>
+      <text x="525" y="355" class="value">2026/10/12 17:37:48</text>
+    </svg>
+    
