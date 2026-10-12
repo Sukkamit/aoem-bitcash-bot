@@ -122,7 +122,16 @@ export class BotEngine extends EventEmitter {
     try {
       this.updateOrderStatus(order.id, 'INITIALIZING', 'กำลังเปิดเบราว์เซอร์ Chromium ใน Region Japan');
 
-      browser = await chromium.launch({
+      // Detect available browser executable on Windows if default playwright browser is not downloaded
+      const possiblePaths = [
+        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+        'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+      ];
+      const executablePath = possiblePaths.find((p) => fs.existsSync(p));
+
+      const launchOptions: any = {
         headless: CONFIG.BOT.HEADLESS,
         args: [
           '--no-sandbox',
@@ -130,7 +139,12 @@ export class BotEngine extends EventEmitter {
           '--disable-blink-features=AutomationControlled',
           '--lang=ja-JP,ja',
         ],
-      });
+      };
+      if (executablePath) {
+        launchOptions.executablePath = executablePath;
+      }
+
+      browser = await chromium.launch(launchOptions);
 
       context = await browser.newContext({
         locale: 'ja-JP',
