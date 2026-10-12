@@ -1,0 +1,50 @@
+{
+  "name": "aoem-bitcash-bot",
+  "version": "1.0.0",
+  "description": "Age of Empires Mobile Automated Top-Up Bot via Bitcash (MyBitCash) with Balance Checker",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').cpSync('src/public', 'dist/public', {recursive: true, force: true})\"",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest --runInBand --detectOpenHandles",
+    "test:coverage": "jest --runInBand --coverage"
+  },
+  "keywords": [
+    "aoem",
+    "midasbuy",
+    "bitcash",
+    "mybitcash",
+    "bot",
+    "topup",
+    "balance-checker",
+    "age-of-empires-mobile"
+  ],
+  "author": "Inblack Candidate",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "imapflow": "^1.0.171",
+    "mailparser": "^3.7.2",
+    "playwright": "^1.49.1",
+    "uuid": "^11.0.5",
+    "ws": "^8.18.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/mailparser": "^3.4.5",
+    "@types/node": "^22.13.1",
+    "@types/supertest": "^6.0.2",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.14",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "tsx": "^4.19.2",
+    "typescript": "5.7.3"
+  }
+}

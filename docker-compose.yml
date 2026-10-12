@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  aoem-bitcash-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aoem_bitcash_bot
+    restart: always
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+      NODE_ENV: production
+      SIMULATE_MODE: "true"
+      MIDASBUY_EMAIL: "Botfordevinblack@hotmail.com"
+      MIDASBUY_PASSWORD: "testdev123"
+      BITCASH_MEMBER_ID: "Inblackm7"
+      BITCASH_PASSWORD: "kanomtandede@7"
+      EMAIL_OTP_USER: "Inblackbitcash7g@hotmail.com"
+      EMAIL_OTP_PASSWORD: "Tishaluna123"
+    volumes:
+      - ./data:/app/data
+      - ./public/receipts:/app/public/receipts

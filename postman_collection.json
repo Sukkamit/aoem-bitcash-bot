@@ -1,0 +1,93 @@
+{
+  "info": {
+    "_postman_id": "aoem-bitcash-bot-collection",
+    "name": "AOEM BitCash Top-Up Bot API",
+    "description": "Postman API Collection for Age of Empires Mobile BitCash automated top-up bot and balance checker",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "System & Balance",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "Get BitCash Balance",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/bitcash/balance"
+          }
+        },
+        {
+          "name": "Direct Check BitCash Balance",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/bitcash/balance/check"
+          }
+        },
+        {
+          "name": "Get Balance Transaction History",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/bitcash/balance/history"
+          }
+        },
+        {
+          "name": "Get Bot Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/bot/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Top-up Orders",
+      "item": [
+        {
+          "name": "Create Top-up Order (146 JPY)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"5250140737488366145\",\n  \"server\": \"Empire#239\",\n  \"packName\": \"99+109 Coin\",\n  \"priceJpy\": 146,\n  \"autoExecute\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/topup/orders"
+          }
+        },
+        {
+          "name": "List All Orders",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/topup/orders"
+          }
+        },
+        {
+          "name": "Submit 6-digit OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"151550\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/otp/submit"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3003",
+      "type": "string"
+    }
+  ]
+}

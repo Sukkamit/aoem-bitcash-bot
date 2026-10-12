@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Age of Empires Mobile - Bitcash Top-Up Bot & Balance Checker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-card: #141c2e;
+      --bg-card-sub: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gold: #facc15;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-main);
+      color: var(--text);
+      font-family: 'Prompt', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #060911;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: #000;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+    }
+
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-live {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    main {
+      flex: 1;
+      padding: 24px 28px;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+    }
+
+    /* Balance Hero Box */
+    .balance-box {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 10px;
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .balance-val {
+      font-size: 2.2rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--gold);
+    }
+
+    .btn {
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      font-size: 0.875rem;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-warning { background: var(--warning); color: #000; font-weight: 600; }
+    .btn-refresh { background: var(--bg-card-sub); color: white; border: 1px solid var(--border); }
+    .btn-refresh:hover { background: #334155; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+    /* Form Fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      background: var(--bg-card-sub);
+      border: 1px solid var(--border);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .safety-notice {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid var(--warning);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.825rem;
+      color: #fde68a;
+    }
+
+    /* Step Tracker */
+    .step-tracker {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg-card-sub);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 0.85rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+
+    .step-item.active {
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .step-item.completed {
+      color: var(--success);
+    }
+
+    .step-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .step-item.active .step-badge {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    }
+
+    .step-item.completed .step-badge {
+      background: var(--success);
+      color: white;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 26px;
+      width: 90%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .otp-input {
+      width: 48px;
+      height: 56px;
+      text-align: center;
+      font-size: 1.6rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      background: var(--bg-card-sub);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: white;
+    }
+
+    .otp-input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg-card-sub);
+      color: var(--text-muted);
+      padding: 12px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .status-tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-completed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-pending { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .status-waiting_otp { background: rgba(245, 158, 11, 0.2); color: #fbbf24; animation: pulse 1.5s infinite; }
+    .status-failed { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">AO</div>
+      <div class="brand-title">
+        AOEM BitCash Top-Up Bot
+        <span class="badge-live">
+          <span class="dot"></span>
+          <span id="ws-badge">WS CONNECTED</span>
+        </span>
+      </div>
+    </div>
+    <div>
+      <span style="font-family:'JetBrains Mono'; font-size:0.85rem; color:var(--text-muted);" id="live-clock">--:--:--</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Top Row: Balance & Bot State -->
+    <div class="grid-2">
+      <!-- Balance Card -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <line x1="2" y1="10" x2="22" y2="10"></line>
+            </svg>
+            ยอดเงิน MyBitCash คงเหลือ (BitCash Fund)
+          </h2>
+          <button class="btn btn-sm btn-refresh" onclick="fetchBalance()">
+            เช็คยอดล่าสุด
+          </button>
+        </div>
+
+        <div class="balance-box">
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">マイビットキャッシュ残高 (Balance)</div>
+            <div class="balance-val" id="balance-display">25,140 クレジット</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
+              Member ID: <strong style="color:white;" id="member-id">Inblackm7</strong> | อัปเดตล่าสุด: <span id="balance-updated">เมื่อสักครู่</span>
+            </div>
+          </div>
+          <button class="btn btn-warning" onclick="queryDirectBalance()">
+            เช็คยอดเงินอัตโนมัติ
+          </button>
+        </div>
+      </div>
+
+      <!-- Bot Engine Status Card -->
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          สถานะการทำงานบอท (Bot Execution)
+        </h2>
+        <div style="background:var(--bg-card-sub); border-radius:8px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">สถานะปัจจุบัน</div>
+            <div style="font-size:1.1rem; font-weight:600;" id="bot-status-text">พร้อมทำงาน (IDLE)</div>
+          </div>
+          <span class="status-tag status-completed" id="bot-status-tag">STANDBY</span>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted);" id="current-step-desc">
+          ไม่มีงานค้างอยู่ในคิว พร้อมรับคำสั่งเติมเงิน
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Row: Top-up Trigger Form & Steps -->
+    <div class="grid-2">
+      <!-- Order Form -->
+      <div class="card">
+        <h2 class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          สั่งการบอทเติมเงิน (Top-Up Order)
+        </h2>
+
+        <div class="form-group">
+          <label>Region & เกม</label>
+          <input type="text" class="form-control" value="Japan (JP) - Age of Empires Mobile" disabled />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Player UID</label>
+            <input type="text" class="form-control" id="order-uid" value="5250140737488366145" />
+          </div>
+          <div class="form-group">
+            <label>Server</label>
+            <input type="text" class="form-control" id="order-server" value="Empire#239" />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>แพ็กเกจ (Pack)</label>
+            <input type="text" class="form-control" value="99+109 Coin (ล็อคเพื่อความปลอดภัย)" disabled />
+          </div>
+          <div class="form-group">
+            <label>ราคา (Price)</label>
+            <input type="text" class="form-control" value="146 JPY (เครดิต BitCash)" disabled />
+          </div>
+        </div>
+
+        <div class="safety-notice">
+          ⚠️ <strong>ข้อกำหนดความปลอดภัย:</strong> ระบบล็อคให้เลือกเฉพาะ Pack 99+109 Coin (146 JPY) เพื่อป้องกันการสูญเสียเงินทดสอบตามเงื่อนไขที่กำหนด
+        </div>
+
+        <button class="btn btn-primary" id="btn-start-topup" onclick="startTopup()">
+          🚀 เริ่มทำรายการเติมเงินอัตโนมัติ (Start Top-Up)
+        </button>
+      </div>
+
+      <!-- Step Workflow Tracker -->
+      <div class="card">
+        <h2 class="card-title">ขั้นตอนการทำงานอัตโนมัติ (Automated Flow)</h2>
+        <div class="step-tracker">
+          <div class="step-item" id="step-1">
+            <div class="step-badge">1</div>
+            <div>เปิด Midasbuy Region Japan (aoem)</div>
+          </div>
+          <div class="step-item" id="step-2">
+            <div class="step-badge">2</div>
+            <div>Login บัญชี Midasbuy (Botfordevinblack@hotmail.com)</div>
+          </div>
+          <div class="step-item" id="step-3">
+            <div class="step-badge">3</div>
+            <div>กรอกและตรวจสอบ UID (5250140737488366145) & Server (Empire#239)</div>
+          </div>
+          <div class="step-item" id="step-4">
+            <div class="step-badge">4</div>
+            <div>เลือก Pack 99+109 Coin (146 JPY)</div>
+          </div>
+          <div class="step-item" id="step-5">
+            <div class="step-badge">5</div>
+            <div>เลือกช่องทางชำระเงิน Bitcash -> เข้าสู่ MyBitCash (Inblackm7)</div>
+          </div>
+          <div class="step-item" id="step-6">
+            <div class="step-badge">6</div>
+            <div>ดึง/กรอกรหัส OTP 6 หลัก จาก Hotmail -> ตัดเงินสำเร็จ & แคปรูปใบเสร็จ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders & Receipts History -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          ประวัติการทำรายการ & หลักฐานใบเสร็จ (Receipts & Logs)
+        </h2>
+        <button class="btn btn-sm btn-refresh" onclick="fetchOrders()">รีเฟรชประวัติ</button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>UID & Server</th>
+              <th>สถานะ</th>
+              <th>เลขที่ใบเสร็จ (Invoice No.)</th>
+              <th>ยอดที่ตัด</th>
+              <th>ยอดคงเหลือ</th>
+              <th>เวลาที่ทำรายการ</th>
+              <th>หลักฐาน</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">กำลังโหลดประวัติออเดอร์...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive OTP Modal -->
+  <div class="modal-backdrop" id="otp-modal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1.15rem; font-weight:600;">🔐 กรอกรหัส OTP ยืนยัน BitCash</h3>
+        <span style="font-size:0.75rem; color:var(--warning);">Step 5.3</span>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-muted);">
+        ระบบได้ส่งรหัส OTP 6 หลักไปยังอีเมล <strong style="color:white;">Inblackbitcash7g@hotmail.com</strong> แล้ว หรือขอรับจาก HR ช่วง 12:00 - 17:00
+      </p>
+
+      <div class="otp-inputs">
+        <input type="text" maxlength="1" class="otp-input" id="otp-1" />
+        <input type="text" maxlength="1" class="otp-input" id="otp-2" />
+        <input type="text" maxlength="1" class="otp-input" id="otp-3" />
+        <input type="text" maxlength="1" class="otp-input" id="otp-4" />
+        <input type="text" maxlength="1" class="otp-input" id="otp-5" />
+        <input type="text" maxlength="1" class="otp-input" id="otp-6" />
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn btn-refresh" onclick="closeOtpModal()">ปิด</button>
+        <button class="btn btn-success" onclick="submitOtpFromModal()">ยืนยันรหัส OTP</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Live clock
+    setInterval(() => {
+      document.getElementById('live-clock').textContent = new Date().toLocaleTimeString('th-TH');
+    }, 1000);
+
+    let activeOrderId = null;
+    let ws = null;
+
+    function connectWs() {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${location.host}/ws`);
+
+      ws.onopen = () => {
+        document.getElementById('ws-badge').textContent = 'WS CONNECTED';
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.event === 'order_updated') {
+            updateLiveOrderProgress(msg.data);
+          } else if (msg.event === 'order_completed') {
+            updateLiveOrderProgress(msg.data);
+            fetchBalance();
+            fetchOrders();
+          }
+        } catch (err) {}
+      };
+
+      ws.onclose = () => {
+        document.getElementById('ws-badge').textContent = 'RECONNECTING';
+        setTimeout(connectWs, 3000);
+      };
+    }
+    connectWs();
+
+    async function fetchBalance() {
+      try {
+        const res = await fetch('/api/v1/bitcash/balance');
+        const json = await res.json();
+        if (json.success && json.data) {
+          document.getElementById('balance-display').textContent = json.data.formattedBalance;
+          document.getElementById('member-id').textContent = json.data.memberId;
+          document.getElementById('balance-updated').textContent = new Date(json.data.lastUpdated).toLocaleTimeString('th-TH');
+        }
+      } catch (err) {}
+    }
+
+    async function queryDirectBalance() {
+      try {
+        const res = await fetch('/api/v1/bitcash/balance/check', { method: 'POST' });
+        const json = await res.json();
+        if (json.success) {
+          alert(`เช็คยอดสำเร็จ: ${json.data.balanceCredits.toLocaleString()} クレジット`);
+          fetchBalance();
+        }
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการเช็คยอด');
+      }
+    }
+
+    async function fetchOrders() {
+      try {
+        const res = await fetch('/api/v1/topup/orders');
+        const json = await res.json();
+        const tbody = document.getElementById('orders-tbody');
+        if (json.success && json.data) {
+          if (json.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;">ไม่มีประวัติการทำรายการ</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = json.data.map(o => `
+            <tr>
+              <td><strong>#${o.id}</strong></td>
+              <td>${o.uid}<br><span style="color:#64748b;font-size:0.75rem;">${o.server}</span></td>
+              <td><span class="status-tag status-${o.status.toLowerCase()}">${o.status}</span></td>
+              <td>${o.receipt ? o.receipt.invoiceNo : '-'}</td>
+              <td>${o.priceJpy} JPY</td>
+              <td style="color:#facc15;">${o.receipt ? o.receipt.remainingBalanceCredits.toLocaleString() + ' Cr' : '-'}</td>
+              <td style="font-size:0.75rem;color:#94a3b8;">${new Date(o.createdAt).toLocaleTimeString('th-TH')}</td>
+              <td>
+                ${o.receipt ? `<a href="${o.receipt.screenshotUrl}" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">ดูใบเสร็จ</a>` : ''}
+                ${o.status === 'WAITING_OTP' ? `<button class="btn btn-sm btn-warning" onclick="openOtpModal('${o.id}')">ใส่ OTP</button>` : ''}
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {}
+    }
+
+    async function startTopup() {
+      const uid = document.getElementById('order-uid').value;
+      const server = document.getElementById('order-server').value;
+      const btn = document.getElementById('btn-start-topup');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/v1/topup/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid, server, autoExecute: true })
+        });
+        const json = await res.json();
+        if (json.success) {
+          activeOrderId = json.data.id;
+          updateLiveOrderProgress(json.data);
+          fetchOrders();
+        } else {
+          alert('ผิดพลาด: ' + (json.error || ''));
+        }
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการส่งคำสั่ง');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function updateLiveOrderProgress(order) {
+      document.getElementById('bot-status-text').textContent = order.status;
+      document.getElementById('bot-status-tag').textContent = order.status;
+      document.getElementById('current-step-desc').textContent = order.stepDescription;
+
+      // Update step numbers visually
+      const stepMapping = {
+        'INITIALIZING': 1,
+        'LOGGING_IN_MIDASBUY': 2,
+        'SELECTING_PACKAGE': 3,
+        'REDIRECTING_BITCASH': 5,
+        'LOGGING_IN_MYBITCASH': 5,
+        'WAITING_OTP': 6,
+        'SUBMITTING_OTP': 6,
+        'PAYMENT_COMPLETED': 6,
+        'RECEIPT_CAPTURED': 6,
+      };
+
+      const currentStepNum = stepMapping[order.status] || 0;
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById(`step-${i}`);
+        if (i < currentStepNum) {
+          el.className = 'step-item completed';
+        } else if (i === currentStepNum) {
+          el.className = 'step-item active';
+        } else {
+          el.className = 'step-item';
+        }
+      }
+
+      if (order.status === 'WAITING_OTP') {
+        openOtpModal(order.id);
+      }
+    }
+
+    function openOtpModal(orderId) {
+      activeOrderId = orderId;
+      document.getElementById('otp-modal').style.display = 'flex';
+      setupOtpInputHandlers();
+      document.getElementById('otp-1').focus();
+    }
+
+    function closeOtpModal() {
+      document.getElementById('otp-modal').style.display = 'none';
+    }
+
+    function setupOtpInputHandlers() {
+      const inputs = [1,2,3,4,5,6].map(i => document.getElementById(`otp-${i}`));
+      inputs.forEach((input, idx) => {
+        input.oninput = () => {
+          if (input.value && idx < 5) inputs[idx + 1].focus();
+        };
+        input.onkeydown = (e) => {
+          if (e.key === 'Backspace' && !input.value && idx > 0) inputs[idx - 1].focus();
+        };
+      });
+    }
+
+    async function submitOtpFromModal() {
+      const code = [1,2,3,4,5,6].map(i => document.getElementById(`otp-${i}`).value).join('');
+      if (code.length !== 6) {
+        alert('กรุณากรอกรหัส OTP ให้ครบ 6 หลัก');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/v1/topup/orders/${activeOrderId}/otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otp: code })
+        });
+        const json = await res.json();
+        if (json.success) {
+          closeOtpModal();
+        } else {
+          alert('OTP ไม่ถูกต้อง: ' + (json.error || ''));
+        }
+      } catch (err) {
+        alert('ส่ง OTP ไม่สำเร็จ');
+      }
+    }
+
+    fetchBalance();
+    fetchOrders();
+  </script>
+</body>
+</html>

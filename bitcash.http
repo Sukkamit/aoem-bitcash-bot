@@ -1,0 +1,63 @@
+### ==============================================================================
+### Age of Empires Mobile (AOEM) - BitCash Automated Top-Up Bot REST API
+### Base URL: http://localhost:3003
+### ==============================================================================
+
+@baseUrl = http://localhost:3003
+
+### 1. Health Check
+GET {{baseUrl}}/health
+
+### 2. Check MyBitCash Balance & Member Info
+GET {{baseUrl}}/api/v1/bitcash/balance
+
+### 3. Direct Query BitCash Balance (Real-time check)
+POST {{baseUrl}}/api/v1/bitcash/balance/check
+
+### 4. Get BitCash Transaction Ledger History
+GET {{baseUrl}}/api/v1/bitcash/balance/history
+
+### 5. Check Bot Engine Status (Idle/Busy/Waiting OTP)
+GET {{baseUrl}}/api/v1/bot/status
+
+### ==============================================================================
+### Top-up Order Operations
+### ==============================================================================
+
+### 6. Create & Auto-Queue Top-up Order (Locked to 99+109 Coin / 146 JPY)
+POST {{baseUrl}}/api/v1/topup/orders
+Content-Type: application/json
+
+{
+  "uid": "5250140737488366145",
+  "server": "Empire#239",
+  "packName": "99+109 Coin",
+  "priceJpy": 146,
+  "autoExecute": true
+}
+
+### 7. Test Safety Guard: Reject Expensive Pack (e.g. 10,000 JPY)
+POST {{baseUrl}}/api/v1/topup/orders
+Content-Type: application/json
+
+{
+  "uid": "5250140737488366145",
+  "server": "Empire#239",
+  "packName": "9200 Coin",
+  "priceJpy": 10000,
+  "autoExecute": false
+}
+
+### 8. List All Orders & Statuses
+GET {{baseUrl}}/api/v1/topup/orders
+
+### 9. Get Specific Order Details & Receipt
+GET {{baseUrl}}/api/v1/topup/orders/AOEM-XXXXXX-XXX
+
+### 10. Submit Manual OTP (During 12:00 - 17:00 HR testing window)
+POST {{baseUrl}}/api/v1/otp/submit
+Content-Type: application/json
+
+{
+  "otp": "151550"
+}
